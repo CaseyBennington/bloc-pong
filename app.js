@@ -13,10 +13,18 @@ function setupCanvas() {
 }
 
 function Paddle() {
-  //this.x = x;
-  //this.y = y;
+  this.x = 1;
+  this.y = 1;
   this.width = 6;
   this.height = 30;
+  this.speed = 5;
+  this.move = function() {
+    if (upPressed && this.y < canvas.height-this.height) {
+      this.y += this.speed;
+    } else if (downPressed && this.y > 0) {
+      this.y -= this.speed;
+    }
+  };
 }
 function Player() {
   Paddle.call(this);
@@ -28,9 +36,9 @@ function Computer() {
   this.x = 285;
   this.y = 10;
 }
-function Ball() {
-  this.x = canvas.width/2;
-  this.y = canvas.height/2;
+function Ball(x, y) {
+  this.x = x;
+  this.y = y;
   this.width = 6;
   this.height = 6;
 }
@@ -63,14 +71,49 @@ Ball.prototype.render = function() {
 
 var player = new Player();
 var computer = new Computer();
-var ball = new Ball();
+var ball = new Ball(canvas.width/2, canvas.height/2);
 
 function render() {
   player.render();
   computer.render();
   ball.render();
 }
+
+var animate =
+        window.requestAnimationFrame(step) ||
+        window.webkitRequestAnimationFrame(step) ||
+        window.mozRequesetAnimationFrame(step) ||
+        window.oRequestAnimationFrame(step) ||
+        window.msRequestAnimationFrame(step) ||
+        function(step) {
+          window.setTimeout(step, 1000/60);
+        };
+function step() {
+  render();
+  animate(step);
+}
 window.onload = function() {
   setupCanvas();
-  render();
+  animate(step);
 };
+
+var upPressed = false;
+var downPressed = false;
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+function keyDownHandler(e) {
+  if (e.keyCode == 38) {
+    upPressed = true;
+    player.move();
+  } else if (e.keyCode == 40) {
+    downPressed = true;
+    player.move();
+  }
+}
+function keyUpHandler(e) {
+  if (e.keyCode == 38) {
+    upPressed = false;
+  } else if (e.keyCode == 40) {
+    downPressed = false;
+  }
+}
