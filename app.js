@@ -13,28 +13,30 @@ function setupCanvas() {
   ctx.closePath();
 }
 
-function Paddle() {
-  this.x = 1;
-  this.y = 1;
+function Paddle(x, y) {
+  this.x = x;
+  this.y = y;
   this.width = 5;
   this.height = 25;
   this.speed = 10;
 }
-function Player() {
+function Player(x, y) {
   Paddle.call(this);
-  this.x = 10;
-  this.y = 100;
+  this.x = x;
+  this.y = y;
 }
-function Computer() {
+function Computer(x, y) {
   Paddle.call(this);
-  this.x = 285;
-  this.y = 10;
+  this.x = x;
+  this.y = y;
 }
 function Ball(x, y) {
   this.x = x;
   this.y = y;
   this.width = 5;
   this.height = 5;
+  this.vx = Math.floor(Math.random() * 4 - 2);
+  this.vy = 3 - Math.abs(this.vx);
 }
 
 Paddle.prototype = {
@@ -63,15 +65,59 @@ Computer.prototype.constructor = Computer;
 //Computer.prototype.render = function() {
   //Paddle.render();
 //};
-Ball.prototype.render = function() {
-  ctx.beginPath();
-  ctx.rect(this.x, this.y, this.width, this.height);
-  ctx.fillStyle = "white";
-  ctx.fill();
+
+Ball.prototype = {
+  render: function() {
+    ctx.beginPath();
+    ctx.rect(this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "white";
+    ctx.fill();
+  },
+  update: function() {
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (this.vx > 0) {
+      if (player.x <= this.x + this.width && player.x > this.x - this.vx + this.width) {
+        var collisionDiff = this.x + this.width - player.x;
+        var k = collisionDiff / this.vx;
+        var y = this.vy * k + (this.y - this.vy);
+        if (y >= player.y && y + this.height <= player.y + player.height) {
+          // collides with right Paddle
+          this.x = player.x - player.width;
+          this.y = Math.floor(this.y - this.vy + this.vy * k);
+          this.vx = -this.vx;
+        }
+      }
+      //if (this.x + this.vx > canvas.width - this.width || this.x + this.vx < 0) {
+      //  score increase
+      //}
+      //if (this.y + this.vy > canvas.height - this.height || this.y + this.vy < 0) {
+      //  this.vy = -this.vy;
+      //}
+    } else {
+      if (computer.x + computer.width >= this.x) {
+        var collisionDiff = computer.x + computer.width - this.x;
+        var k = collisionDiff / -this.vx;
+        var y = this.vy * k + (this.y - this.vy);
+        if (y >= computer.y && y + this.height <= computer.y + computer.height) {
+          // collides with left Paddle
+          this.x = computer.x - computer.width;
+          this.y = Math.floor(this.y - this.vy + this.vy * k);
+          this.vx = -this.vx;
+        }
+      }
+    }
+
+    // Top and bottom collision
+    if ((this.vy < 0 && this.y < 0) || (this.vy > 0 && this.y + this.height > canvas.height)) {
+      this.vy = -this.vy;
+    }
+  }
 };
 
-var player = new Player();
-var computer = new Computer();
+var player = new Player(285, 10);
+var computer = new Computer(10, 100);
 var ball = new Ball(canvas.width/2, canvas.height/2);
 
 function render() {
@@ -92,6 +138,7 @@ var animate =
         };
 function step() {
   render();
+  ball.update();
   animate(step);
 }
 window.onload = function() {
