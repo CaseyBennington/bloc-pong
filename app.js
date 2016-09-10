@@ -2,6 +2,7 @@ var canvas = document.getElementById('myCanvas');
 var ctx = canvas.getContext('2d');
 
 function setupCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.setLineDash([5, 2]);
 
   ctx.beginPath();
@@ -15,16 +16,9 @@ function setupCanvas() {
 function Paddle() {
   this.x = 1;
   this.y = 1;
-  this.width = 6;
-  this.height = 30;
-  this.speed = 5;
-  this.move = function() {
-    if (upPressed && this.y < canvas.height-this.height) {
-      this.y += this.speed;
-    } else if (downPressed && this.y > 0) {
-      this.y -= this.speed;
-    }
-  };
+  this.width = 5;
+  this.height = 25;
+  this.speed = 10;
 }
 function Player() {
   Paddle.call(this);
@@ -39,23 +33,30 @@ function Computer() {
 function Ball(x, y) {
   this.x = x;
   this.y = y;
-  this.width = 6;
-  this.height = 6;
+  this.width = 5;
+  this.height = 5;
 }
+
+Paddle.prototype = {
+  render: function() {
+    ctx.beginPath();
+    ctx.rect(this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "white";
+    ctx.fill();
+  },
+  move: function() {
+    if (upPressed && this.y > 0) {
+      this.y -= this.speed;
+    } else if (downPressed && this.y < canvas.height-this.height) {
+      this.y += this.speed;
+    }
+  }
+};
+
 Player.prototype = Object.create(Paddle.prototype);
 Player.prototype.constructor = Player;
 Computer.prototype = Object.create(Paddle.prototype);
 Computer.prototype.constructor = Computer;
-
-Paddle.prototype.move = function() {
-  return stuff;
-};
-Paddle.prototype.render = function() {
-  ctx.beginPath();
-  ctx.rect(this.x, this.y, this.width, this.height);
-  ctx.fillStyle = "white";
-  ctx.fill();
-};
 //Player.prototype.render = function() {
   //Paddle.render();
 //};
@@ -74,17 +75,18 @@ var computer = new Computer();
 var ball = new Ball(canvas.width/2, canvas.height/2);
 
 function render() {
+  setupCanvas();
   player.render();
   computer.render();
   ball.render();
 }
 
 var animate =
-        window.requestAnimationFrame(step) ||
-        window.webkitRequestAnimationFrame(step) ||
-        window.mozRequesetAnimationFrame(step) ||
-        window.oRequestAnimationFrame(step) ||
-        window.msRequestAnimationFrame(step) ||
+        window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequesetAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
         function(step) {
           window.setTimeout(step, 1000/60);
         };
