@@ -1,17 +1,35 @@
-var canvas = document.getElementById('myCanvas');
-var ctx = canvas.getContext('2d');
+function Game() {
+  var canvas = document.getElementById('myCanvas');
+  this.ctx = canvas.getContext('2d');
 
-function setupCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.setLineDash([5, 2]);
-
-  ctx.beginPath();
-  ctx.moveTo(canvas.width/2, 0);
-  ctx.lineTo(canvas.width/2, canvas.height);
-  ctx.strokeStyle="white";
-  ctx.stroke();
-  ctx.closePath();
+  this.player = new Player(285, 10);
+  this.computer = new Computer(10, 100);
+  this.ball = new Ball(this.ctx.canvas.width/2, this.ctx.canvas.height/2);
 }
+
+Game.prototype = {
+  render: function() {
+    this.setupCanvas();
+    this.player.render(this.ctx);
+    this.computer.render(this.ctx);
+    this.ball.render(this.ctx);
+  },
+  update: function() {
+    if (this.paused)
+      return;
+  },
+  setupCanvas: function() {
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.setLineDash([5, 2]);
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.ctx.canvas.width/2, 0);
+    this.ctx.lineTo(this.ctx.canvas.width/2, this.ctx.canvas.height);
+    this.ctx.strokeStyle="white";
+    this.ctx.stroke();
+    this.ctx.closePath();
+  }
+};
 
 function Paddle(x, y) {
   this.x = x;
@@ -19,6 +37,7 @@ function Paddle(x, y) {
   this.width = 5;
   this.height = 25;
   this.speed = 10;
+  this.score = 0;
 }
 function Player(x, y) {
   Paddle.call(this);
@@ -35,12 +54,12 @@ function Ball(x, y) {
   this.y = y;
   this.width = 5;
   this.height = 5;
-  this.vx = Math.floor(Math.random() * 4 - 2);
-  this.vy = 3 - Math.abs(this.vx);
+  this.vx = Math.floor(Math.random() * 4 - 4);
+  this.vy = 2 - Math.abs(this.vx);
 }
 
 Paddle.prototype = {
-  render: function() {
+  render: function(ctx) {
     ctx.beginPath();
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.fillStyle = "white";
@@ -49,7 +68,7 @@ Paddle.prototype = {
   move: function() {
     if (upPressed && this.y > 0) {
       this.y -= this.speed;
-    } else if (downPressed && this.y < canvas.height-this.height) {
+    } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
       this.y += this.speed;
     }
   }
@@ -59,32 +78,28 @@ Player.prototype = Object.create(Paddle.prototype);
 Player.prototype.constructor = Player;
 Computer.prototype = Object.create(Paddle.prototype);
 Computer.prototype.constructor = Computer;
-//Player.prototype.render = function() {
-  //Paddle.render();
-//};
-//Computer.prototype.render = function() {
-  //Paddle.render();
-//};
 
 Ball.prototype = {
-  render: function() {
+  render: function(ctx) {
     ctx.beginPath();
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.fillStyle = "white";
     ctx.fill();
   },
-  update: function() {
+  move: function() {
     this.x += this.vx;
     this.y += this.vy;
-
+  },
+  update: function() {
+    this.move();
     if (this.vx > 0) {
-      if (player.x <= this.x + this.width && player.x > this.x - this.vx + this.width) {
-        var collisionDiff = this.x + this.width - player.x;
+      if (game.player.x <= this.x + this.width && game.player.x > this.x - this.vx + this.width) {
+        var collisionDiff = this.x + this.width - game.player.x;
         var k = collisionDiff / this.vx;
         var y = this.vy * k + (this.y - this.vy);
-        if (y >= player.y && y + this.height <= player.y + player.height) {
+        if (y >= game.player.y && y + this.height <= game.player.y + game.player.height) {
           // collides with right Paddle
-          this.x = player.x - player.width;
+          this.x = game.player.x - game.player.width;
           this.y = Math.floor(this.y - this.vy + this.vy * k);
           this.vx = -this.vx;
         }
@@ -96,13 +111,13 @@ Ball.prototype = {
       //  this.vy = -this.vy;
       //}
     } else {
-      if (computer.x + computer.width >= this.x) {
-        var collisionDiff = computer.x + computer.width - this.x;
+      if (game.computer.x + game.computer.width >= this.x) {
+        var collisionDiff = game.computer.x + game.computer.width - this.x;
         var k = collisionDiff / -this.vx;
         var y = this.vy * k + (this.y - this.vy);
-        if (y >= computer.y && y + this.height <= computer.y + computer.height) {
+        if (y >= game.computer.y && y + this.height <= game.computer.y + game.computer.height) {
           // collides with left Paddle
-          this.x = computer.x - computer.width;
+          this.x = game.computer.x - game.computer.width;
           this.y = Math.floor(this.y - this.vy + this.vy * k);
           this.vx = -this.vx;
         }
@@ -110,23 +125,37 @@ Ball.prototype = {
     }
 
     // Top and bottom collision
-    if ((this.vy < 0 && this.y < 0) || (this.vy > 0 && this.y + this.height > canvas.height)) {
+    if ((this.vy < 0 && this.y < 0) || (this.vy > 0 && this.y + this.height > game.ctx.canvas.height)) {
       this.vy = -this.vy;
     }
   }
 };
 
-var player = new Player(285, 10);
-var computer = new Computer(10, 100);
-var ball = new Ball(canvas.width/2, canvas.height/2);
-
-function render() {
-  setupCanvas();
-  player.render();
-  computer.render();
-  ball.render();
+var upPressed = false;
+var downPressed = false;
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+function keyDownHandler(e) {
+  if (e.keyCode == 38) {
+    upPressed = true;
+    game.player.move();
+  } else if (e.keyCode == 40) {
+    downPressed = true;
+    game.player.move();
+  }
+}
+function keyUpHandler(e) {
+  if (e.keyCode == 38) {
+    upPressed = false;
+  } else if (e.keyCode == 40) {
+    downPressed = false;
+  }
 }
 
+// Initialize our game.
+var game = new Game();
+
+// Define our animation frames
 var animate =
         window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
@@ -137,32 +166,17 @@ var animate =
           window.setTimeout(step, 1000/60);
         };
 function step() {
-  render();
-  ball.update();
+  game.render();
+  game.ball.update();
   animate(step);
 }
-window.onload = function() {
-  setupCanvas();
-  animate(step);
-};
 
-var upPressed = false;
-var downPressed = false;
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-function keyDownHandler(e) {
-  if (e.keyCode == 38) {
-    upPressed = true;
-    player.move();
-  } else if (e.keyCode == 40) {
-    downPressed = true;
-    player.move();
-  }
+function MainFunction() {
+  game.setupCanvas();
+  animate(step);
 }
-function keyUpHandler(e) {
-  if (e.keyCode == 38) {
-    upPressed = false;
-  } else if (e.keyCode == 40) {
-    downPressed = false;
-  }
-}
+
+// Begin the game execution
+window.onload = function() {
+  MainFunction();
+};
