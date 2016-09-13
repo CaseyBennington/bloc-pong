@@ -1,105 +1,86 @@
-function Display(x, y) {
-  this.x = x;
-  this.y = y;
-  this.value = 0;
+class Display {
+  constructor (x, y) {
+    this.x = x;
+    this.y = y;
+    this.value = 0;
+  }
+  render (ctx) {
+    ctx.fillText(this.value, this.x, this.y);
+  }
 }
 
-function Paddle(x, y) {
-  this.x = x;
-  this.y = y;
-  this.width = 5;
-  this.height = 25;
-  this.speed = 10;
-  this.score = 0;
-}
-
-Paddle.prototype = {
-  render: function(ctx) {
+class Paddle {
+  constructor (x, y) {
+    this.x = x;
+    this.y = y;
+    this.width = 5;
+    this.height = 25;
+    this.speed = 10;
+    this.score = 0;
+  }
+  render (ctx) {
     ctx.beginPath();
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.fillStyle = "white";
     ctx.fill();
   }
-  // },
-  // move: function() {
-  //   if (upPressed && this.y > 0) {
-  //     this.y -= this.speed;
-  //   } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
-  //     this.y += this.speed;
-  //   }
-  // }
-};
-
-// Player.prototype = new Paddle();
-// Player.prototype.constructor = Player;
-// Computer.prototype = new Paddle();
-// Computer.prototype.constructor = Computer;
-//
-Player.prototype = Object.create(Paddle.prototype);
-Player.prototype.constructor = Player;
-Computer.prototype = Object.create(Paddle.prototype);
-Computer.prototype.constructor = Computer;
-
-function Player(x, y) {
-  Paddle.call(this);
-  this.x = x;
-  this.y = y;
-}
-function Computer(x, y) {
-  Paddle.call(this);
-  this.x = x;
-  this.y = y;
-}
-function Ball(x, y) {
-  this.x = x;
-  this.y = y;
-  this.width = 5;
-  this.height = 5;
-  this.vx = Math.floor(Math.random() * 4 - 4);
-  this.vy = 2 - Math.abs(this.vx);
 }
 
-Computer.prototype = {
-  update: function(ball) {
-    //this.move;
-    console.log(ball);
+class Player extends Paddle {
+  constructor (x, y, width, height, speed, score) {
+    super(width, height, speed, score);
+    this.x = x;
+    this.y = y;
   }
-};
-
-Player.prototype = {
-  move: function() {
+  move () {
     if (upPressed && this.y > 0) {
       this.y -= this.speed;
     } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
       this.y += this.speed;
     }
   }
-};
+}
 
-Display.prototype = {
-  render: function(ctx) {
-    ctx.fillText(this.value, this.x, this.y);
+class Computer extends Paddle {
+  constructor (x, y, width, height, speed, score) {
+    super(width, height, speed, score);
+    this.x = x;
+    this.y = y;
   }
-};
-
-Ball.prototype = {
-  render: function(ctx) {
+  move (ball) {
+    if (ball.y > this.y) {
+      this.y += this.speed;
+    } else if (ball.y < this.y) {
+      this.y -= this.speed;
+    }
+  }
+}
+class Ball {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.width = 5;
+    this.height = 5;
+    this.vx = Math.floor(Math.random() * 4 - 4);
+    this.vy = 2 - Math.abs(this.vx);
+  }
+  render (ctx) {
     ctx.beginPath();
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.fillStyle = "white";
     ctx.fill();
-  },
-  move: function() {
+  }
+  move () {
     this.x += this.vx;
     this.y += this.vy;
-  },
-  update: function() {
+  }
+  update () {
     this.move();
     if (this.vx > 0) {
       if (game.player.x <= this.x + this.width && game.player.x > this.x - this.vx + this.width) {
-        var collisionDiff = this.x + this.width - game.player.x;
-        var k = collisionDiff / this.vx;
-        var y = this.vy * k + (this.y - this.vy);
+        let collisionDiff = this.x + this.width - game.player.x;
+        let k = collisionDiff / this.vx;
+        let y = this.vy * k + (this.y - this.vy);
         if (y >= game.player.y && y + this.height <= game.player.y + game.player.height) {
           // collides with right Paddle
           this.x = game.player.x - game.player.width;
@@ -107,17 +88,11 @@ Ball.prototype = {
           this.vx = -this.vx;
         }
       }
-      //if (this.x + this.vx > canvas.width - this.width || this.x + this.vx < 0) {
-      //  score increase
-      //}
-      //if (this.y + this.vy > canvas.height - this.height || this.y + this.vy < 0) {
-      //  this.vy = -this.vy;
-      //}
     } else {
       if (game.computer.x + game.computer.width >= this.x) {
-        var collisionDiff = game.computer.x + game.computer.width - this.x;
-        var k = collisionDiff / -this.vx;
-        var y = this.vy * k + (this.y - this.vy);
+        let collisionDiff = game.computer.x + game.computer.width - this.x;
+        let k = collisionDiff / -this.vx;
+        let y = this.vy * k + (this.y - this.vy);
         if (y >= game.computer.y && y + this.height <= game.computer.y + game.computer.height) {
           // collides with left Paddle
           this.x = game.computer.x - game.computer.width;
@@ -133,41 +108,39 @@ Ball.prototype = {
     }
 
     // Determine scoring play
-    if (this.x >= game.width) {
+    if (this.x >= game.canvas.width || isNaN(this.x)) {
       game.score(game.computer);
     } else if (this.x + this.width <= 0) {
       game.score(game.player);
     }
   }
-};
-
-function Game() {
-  var canvas = document.getElementById('myCanvas');
-  this.ctx = canvas.getContext('2d');
-
-  this.player = new Player(285, 10);
-  this.computer = new Computer(10, 100);
-  this.ball = new Ball(this.ctx.canvas.width/2, this.ctx.canvas.height/2);
-  this.display1 = new Display(this.width/4, 25);
-  this.display2 = new Display(this.width*3/4, 25);
 }
 
-Game.prototype = {
-  render: function() {
+class Game {
+  constructor () {
+    this.canvas = document.getElementById('myCanvas');
+    this.ctx = this.canvas.getContext('2d');
+
+    this.player = new Player(285, 10);
+    this.computer = new Computer(10, 100);
+    this.ball = new Ball(this.canvas.width/2, this.canvas.height/2);
+    this.display1 = new Display(this.canvas.width/4, 10);
+    this.display2 = new Display(this.canvas.width*3/4, 10);
+  }
+  render () {
     this.setupCanvas();
     this.player.render(this.ctx);
     this.computer.render(this.ctx);
     this.ball.render(this.ctx);
-  },
-  update: function() {
+  }
+  update () {
     if (this.paused)
       return;
 
-      this.ball.update();
       this.display1.value = this.computer.score;
       this.display2.value = this.player.score;
-  },
-  setupCanvas: function() {
+  }
+  setupCanvas () {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.ctx.setLineDash([5, 2]);
 
@@ -180,25 +153,29 @@ Game.prototype = {
 
     this.display1.render(this.ctx);
     this.display2.render(this.ctx);
-  },
-  score: function(paddle) {
+  }
+  score (paddle) {
     paddle.score++;
-    var player = paddle == this.computer ? 0 : 1;
+    let player = paddle == this.computer ? 0 : 1;
 
-    this.ball.x = this.width/2;
+    this.ball.x = this.canvas.width/2;
     this.ball.y = paddle.y + paddle.height/2;
 
     this.vx = Math.floor(Math.random() * 4 - 4);
-    this.vy = 2 - Math.abs(this.vx);
+    this.vy = 2 - Math.abs(this.ball.vx);
     if (player == 1)
       this.ball.vx *= -1;
   }
-};
+}
 
-var upPressed = false;
-var downPressed = false;
+// Initialize our game.
+let game = new Game();
+
+let upPressed = false;
+let downPressed = false;
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
+
 function keyDownHandler(e) {
   if (e.keyCode == 38) {
     upPressed = true;
@@ -216,11 +193,8 @@ function keyUpHandler(e) {
   }
 }
 
-// Initialize our game.
-var game = new Game();
-
 // Define our animation frames
-var animate =
+let animate =
         window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequesetAnimationFrame ||
@@ -232,7 +206,8 @@ var animate =
 function step() {
   game.render();
   game.ball.update();
-  game.computer.update(game.ball);
+  game.computer.move(game.ball);
+  game.update();
   animate(step);
 }
 
