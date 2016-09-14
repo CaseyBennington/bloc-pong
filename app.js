@@ -1,8 +1,8 @@
 class Display {
-  constructor (x, y) {
+  constructor (x, y, v) {
     this.x = x;
     this.y = y;
-    this.value = 0;
+    this.value = v;
   }
   render (ctx) {
     ctx.fillText(this.value, this.x, this.y);
@@ -124,8 +124,9 @@ class Game {
     this.player = new Player(285, 10);
     this.computer = new Computer(10, 100);
     this.ball = new Ball(this.canvas.width/2, this.canvas.height/2);
-    this.display1 = new Display(this.canvas.width/4, 10);
-    this.display2 = new Display(this.canvas.width*3/4, 10);
+    this.display1 = new Display(this.canvas.width/4, 10, 0);
+    this.display2 = new Display(this.canvas.width*3/4, 10, 0);
+    this.displayMessage = new Display(this.canvas.width/2, this.canvas.height/2, '');
   }
   render () {
     this.setupCanvas();
@@ -134,9 +135,6 @@ class Game {
     this.ball.render(this.ctx);
   }
   update () {
-    if (this.paused)
-      return;
-
       this.display1.value = this.computer.score;
       this.display2.value = this.player.score;
   }
@@ -153,6 +151,7 @@ class Game {
 
     this.display1.render(this.ctx);
     this.display2.render(this.ctx);
+    this.displayMessage.render(this.ctx);
   }
   score (paddle) {
     paddle.score++;
@@ -165,6 +164,20 @@ class Game {
     this.vy = 2 - Math.abs(this.ball.vx);
     if (player == 1)
       this.ball.vx *= -1;
+  }
+  endGame () {
+    if (this.player.score === 11) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.displayMessage.value = 'Game Over. You win!';
+      this.setupCanvas();
+      this.pause = true;
+    }
+    if (this.computer.score === 2) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.displayMessage.value = 'Game Over. You lose!';
+      this.setupCanvas();
+      this.pause = true;
+    }
   }
 }
 
@@ -204,10 +217,14 @@ let animate =
           window.setTimeout(step, 1000/60);
         };
 function step() {
+  if (game.pause) {
+    return;
+  }
   game.render();
   game.ball.update();
   game.computer.move(game.ball);
   game.update();
+  game.endGame();
   animate(step);
 }
 
