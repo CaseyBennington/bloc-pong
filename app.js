@@ -33,19 +33,24 @@ class Player extends Paddle {
     super(width, height, speed, score);
     this.x = x;
     this.y = y;
+    this.keyboard = true;
   }
   keyboardMove () {
-    if (upPressed && this.y > 0) {
-      this.y -= this.speed;
-    } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
-      this.y += this.speed;
+    if (this.keyboard === true) {
+      if (upPressed && this.y > 0) {
+        this.y -= this.speed;
+      } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
+        this.y += this.speed;
+      }
     }
   }
-  mouseMove () {
-    if (upPressed && this.y > 0) {
-      this.y -= this.speed;
-    } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
-      this.y += this.speed;
+  mouseMove (up) {
+    if (this.keyboard === false) {
+      if (up === 1 && this.y > 0) {
+        this.y -= this.speed;
+      } else if (up === 2 && this.y < game.ctx.canvas.height-this.height) {
+        this.y += this.speed;
+      }
     }
   }
 }
@@ -230,7 +235,7 @@ class Game {
 
 let upPressed = false;
 let downPressed = false;
-
+let oldMouseY = 0;
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
@@ -242,6 +247,9 @@ function handleStartMenu(e) {
   // check displayInputChoice1 for hits
   if (x >= game.displayInputChoice1.x && x <= game.displayInputChoice1.x + game.ctx.measureText(game.displayInputChoice1.value).width && y >= game.displayInputChoice1.y && y <= game.displayInputChoice1.y + 40) {
     // add in mouse behavior
+    document.addEventListener('mousemove', mouseMoveHandler, false);
+    game.player.speed = 10;
+    game.player.keyboard = false;
   }
   // check displayInputChoice2 for hits
   if (x >= game.displayInputChoice2.x && x <= game.displayInputChoice2.x + game.ctx.measureText(game.displayInputChoice2.value).width && y >= game.displayInputChoice2.y && y <= game.displayInputChoice2.y + 40) {
@@ -301,6 +309,15 @@ function keyUpHandler(e) {
   } else if (e.keyCode == 40) {
     downPressed = false;
   }
+}
+function mouseMoveHandler(e) {
+  if (oldMouseY > e.pageY) {
+    game.player.mouseMove(1);
+
+  } else if (oldMouseY < e.pageY) {
+    game.player.mouseMove(2);
+  }
+  oldMouseY = e.pageY;
 }
 
 function randomVelocity() {
