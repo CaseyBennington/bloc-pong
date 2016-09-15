@@ -34,7 +34,14 @@ class Player extends Paddle {
     this.x = x;
     this.y = y;
   }
-  move () {
+  keyboardMove () {
+    if (upPressed && this.y > 0) {
+      this.y -= this.speed;
+    } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
+      this.y += this.speed;
+    }
+  }
+  mouseMove () {
     if (upPressed && this.y > 0) {
       this.y -= this.speed;
     } else if (downPressed && this.y < game.ctx.canvas.height-this.height) {
@@ -212,11 +219,11 @@ class Game {
       }
 
       this.setupCanvas();
+      this.pause = true;
+
       this.displayMessage.render(this.ctx);
       this.displayRestartGame.render(this.ctx);
       document.addEventListener("click", handleEndMenu, false);
-
-      this.pause = true;
     }
   }
 }
@@ -272,8 +279,9 @@ function handleEndMenu(e) {
 
   // check displayRestartGame for hits
   if (x >= game.displayRestartGame.x && x <= game.displayRestartGame.x + game.ctx.measureText(game.displayRestartGame.value).width && y >= game.displayRestartGame.y && y <= game.displayRestartGame.y + 40) {
-    document.addEventListener("click", handleStartMenu, false);
     let game = new Game();
+    document.removeEventListener("click", handleEndMenu, false);
+    document.addEventListener("click", handleStartMenu, false);
     MainFunction();
   }
 }
@@ -281,10 +289,10 @@ function handleEndMenu(e) {
 function keyDownHandler(e) {
   if (e.keyCode == 38) {
     upPressed = true;
-    game.player.move();
+    game.player.keyboardMove();
   } else if (e.keyCode == 40) {
     downPressed = true;
-    game.player.move();
+    game.player.keyboardMove();
   }
 }
 function keyUpHandler(e) {
