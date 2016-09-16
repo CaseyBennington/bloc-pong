@@ -1,3 +1,6 @@
+/**
+ *
+ */
 class Display {
   constructor (x, y, v) {
     this.x = x;
@@ -62,11 +65,24 @@ class Computer extends Paddle {
     this.y = y;
   }
   move (ball) {
-    if (ball.y > this.y) {
-      this.y += this.speed;
-    } else if (ball.y < this.y) {
-      this.y -= this.speed;
+    let diff = -((this.x + (this.height / 2 )) - ball.x);
+    if ((diff < 0 && diff < -this.speed) && this.y > 0) {
+      this.y -= diff;
+    } else if ((diff > 0 && diff > this.speed) && this.y < game.ctx.canvas.height-this.height) {
+      this.y += diff;
     }
+    if (this.y < 0) {
+      this.y = 0;
+    } else if (this.y + this.height > game.canvas.height) {
+      this.y = game.canvas.height - this.height;
+    }
+
+
+    // if (ball.y > this.y) {
+    //   this.y += 1;
+    // } else if (ball.y < this.y) {
+    //   this.y -= 1;
+    // }
   }
 }
 
@@ -79,53 +95,76 @@ class Ball {
     this.vx = randomVelocity();
     this.vy = 10 - Math.abs(this.vx);
   }
+  ballSpeed () {
+    this.vx = randomVelocity();
+    this.vy = 10 - Math.abs(this.vx);
+  }
   render (ctx) {
     ctx.beginPath();
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.fillStyle = "white";
     ctx.fill();
   }
-  move () {
+  update () {
     this.x += this.vx;
     this.y += this.vy;
-  }
-  update () {
-    this.move();
-    if (this.vx > 0) {
-      if (game.player.x <= this.x + this.width && game.player.x > this.x - this.vx + this.width) {
-        let collisionDiff = this.x + this.width - game.player.x;
-        let k = collisionDiff / this.vx;
-        let y = this.vy * k + (this.y - this.vy);
-        if (y >= game.player.y && y + this.height <= game.player.y + game.player.height) {
-          // collides with right Paddle
-          this.x = game.player.x - game.player.width;
-          this.y = Math.floor(this.y - this.vy + this.vy * k);
-          this.vx = -this.vx;
-        }
+    let left_x = this.x;
+    let left_y = this.y;
+    let right_x = this.x + this.width;
+    let right_y = this.y + this.height;
+
+    if (left_x > game.canvas.width/2) { // check if on the player's side
+      if (left_x < (game.player.x + game.player.width) && right_x >= game.player.x && left_y < (game.player.y + game.player.height) && right_y > game.player.y) {
+        // hit the player's Paddle
+        // this.vx += -(game.player.speed / 4);
+        this.vx = -this.vx;
+        // this.x += this.vx;
       }
-    } else {
-      if (game.computer.x + game.computer.width >= this.x) {
-        let collisionDiff = game.computer.x + game.computer.width - this.x;
-        let k = collisionDiff / -this.vx;
-        let y = this.vy * k + (this.y - this.vy);
-        if (y >= game.computer.y && y + this.height <= game.computer.y + game.computer.height) {
-          // collides with left Paddle
-          this.x = game.computer.x - game.computer.width;
-          this.y = Math.floor(this.y - this.vy + this.vy * k);
-          this.vx = -this.vx;
-        }
+    } else { // else its on the computer's side
+      if (left_x <= (game.computer.x + game.computer.width) && right_x > game.computer.x && left_y < (game.computer.y + game.computer.height) && right_y > game.computer.y) {
+        // hit the computer's Paddle
+        // this.vx += (game.computer.speed / 4);
+        // this.vy = -this.vy;
+        this.vx = -this.vx;
+        // this.x += this.vx;
       }
     }
 
-    // Top and bottom collision
-    if ((this.vy < 0 && this.y < 0) || (this.vy > 0 && this.y + this.height > game.ctx.canvas.height)) {
+    // if (this.vx > 0) {
+    //   if (game.player.x <= this.x + this.width && game.player.x > this.x - this.vx + this.width) {
+    //     let collisionDiff = this.x + this.width - game.player.x;
+    //     let k = collisionDiff / this.vx;
+    //     let y = this.vy * k + (this.y - this.vy);
+    //     if (y >= game.player.y && y + this.height <= game.player.y + game.player.height) {
+    //       // collides with right Paddle
+    //       this.x = game.player.x - game.player.width;
+    //       this.y = Math.floor(this.y - this.vy + this.vy * k);
+    //       this.vx = -this.vx;
+    //     }
+    //   }
+    // } else {
+    //   if (game.computer.x + game.computer.width >= this.x) {
+    //     let collisionDiff = game.computer.x + game.computer.width - this.x;
+    //     let k = collisionDiff / -this.vx;
+    //     let y = this.vy * k + (this.y - this.vy);
+    //     if (y >= game.computer.y && y + this.height <= game.computer.y + game.computer.height) {
+    //       // collides with left Paddle
+    //       this.x = game.computer.x - game.computer.width;
+    //       this.y = Math.floor(this.y - this.vy + this.vy * k);
+    //       this.vx = -this.vx;
+    //     }
+    //   }
+    // }
+
+    // Check for Top and bottom collision
+    if ((this.vy < 0 && this.y < 0) || (this.vy > 0 && this.y + this.height > game.canvas.height)) {
       this.vy = -this.vy;
     }
 
     // Determine scoring play
-    if (this.x >= game.canvas.width || isNaN(this.x)) {
+    if (this.x + this.width >= game.canvas.width || isNaN(this.x)) {
       game.score(game.computer);
-    } else if (this.x + this.width <= 0 || isNaN(this.x)) {
+    } else if (this.x <= 0 || isNaN(this.x)) {
       game.score(game.player);
     }
   }
@@ -173,8 +212,7 @@ class Game {
     this.ball.x = this.canvas.width/2;
     this.ball.y = paddle.y + paddle.height/2;
 
-    this.vx = randomVelocity();
-    this.vy = 10 - Math.abs(this.vx);
+    this.ball.ballSpeed();
     if (player == 1)
       this.ball.vx *= -1;
   }
@@ -233,12 +271,22 @@ class Game {
   }
 }
 
+/**
+ * [upPressed description]
+ * @type {Boolean}
+ */
 let upPressed = false;
 let downPressed = false;
 let oldMouseY = 0;
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
+/**
+ * [handleStartMenu description]
+ * @method handleStartMenu
+ * @param  {[type]}        e [description]
+ * @return {[type]}          [description]
+ */
 function handleStartMenu(e) {
   // get mouse position relative to the canvas
   let x = parseInt(e.clientX - game.canvas.offsetLeft);
