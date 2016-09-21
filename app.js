@@ -216,31 +216,35 @@ class Ball {
       if (game.player.x <= this.x + this.width && game.player.x > this.x - this.vx + this.width) {
         let collisionDiff = this.x + this.width - game.player.x;
         let k = collisionDiff / this.vx;
-        let y = this.vy * k + (this.y - this.vy);
+        let y = this.vy * k + ((this.y + this.width) - this.vy);
         console.log(y >= game.player.y && y + this.height <= game.player.y + game.player.height);
         if (y >= game.player.y && y + this.height <= game.player.y + game.player.height) {
           // collides with right Paddle
-          this.x = game.player.x - game.player.width;
-          this.y = Math.floor(this.y - this.vy + this.vy * k);
+          // this.x = game.player.x - game.player.width;
+          // this.y = Math.floor(this.y - this.vy + this.vy * k);
           this.vx = -this.vx;
         }
+        // game.pause = true;
+        console.log("y: " + y);
+        console.log("ball height: " + this.height);
+        console.log("game.player.y: " + game.player.y);
       }
     } else {
       if (game.computer.x + game.computer.width >= this.x) {
         let collisionDiff = game.computer.x + game.computer.width - this.x;
         let k = collisionDiff / -this.vx;
-        let y = this.vy * k + (this.y - this.vy);
+        let y = this.vy * k + ((this.y + this.width) - this.vy);
         if (y >= game.computer.y && y + this.height <= game.computer.y + game.computer.height) {
           // collides with left Paddle
-          this.x = game.computer.x - game.computer.width;
-          this.y = Math.floor(this.y - this.vy + this.vy * k);
+          // this.x = game.computer.x - game.computer.width;
+          // this.y = Math.floor(this.y - this.vy + this.vy * k);
           this.vx = -this.vx;
         }
       }
     }
 
     // Check for Top and bottom collision
-    if ((this.vy < 0 && this.y < 0) || (this.vy > 0 && this.y + this.height > game.canvas.height)) {
+    if ((this.vy <= 0 && this.y <= 0) || (this.vy > 0 && this.y + this.height > game.canvas.height)) {
       this.vy = -this.vy;
     }
 
@@ -323,10 +327,6 @@ class Game {
     this.displayInputChoice.render(this.ctx);
     this.displayInputChoice1.render(this.ctx);
     this.displayInputChoice2.render(this.ctx);
-    this.ctx.beginPath();
-    this.ctx.rect(game.displayInputChoice1.x, game.displayInputChoice1.y, game.ctx.measureText(game.displayInputChoice1.value).width, 40);
-    this.ctx.fillStyle = "white";
-    this.ctx.fill();
 
     this.pause = true;
   }
@@ -397,8 +397,6 @@ function handleStartMenu(e) {
   // get mouse position relative to the canvas
   let x = parseInt(e.clientX - game.canvas.offsetLeft);
   let y = parseInt(e.clientY - game.canvas.offsetTop);
-console.log('x = ' + x);
-console.log('y = ' + y);
 
   // check displayInputChoice1 for hits
   if (x >= game.displayInputChoice1.x && x <= game.displayInputChoice1.x + game.ctx.measureText(game.displayInputChoice1.value).width && y >= game.displayInputChoice1.y && y <= game.displayInputChoice1.y + 40) {
@@ -406,14 +404,16 @@ console.log('y = ' + y);
     document.addEventListener('mousemove', mouseMoveHandler, false);
     game.player.speed = 10;
     game.player.keyboard = false;
+    document.removeEventListener("click", handleStartMenu, false);
+    document.addEventListener("click", handleComputerMenu, false);
+    game.computerMenu();
   }
   // check displayInputChoice2 for hits
   if (x >= game.displayInputChoice2.x && x <= game.displayInputChoice2.x + game.ctx.measureText(game.displayInputChoice2.value).width && y >= game.displayInputChoice2.y && y <= game.displayInputChoice2.y + 40) {
-    // delete this after everything works
+    document.removeEventListener("click", handleStartMenu, false);
+    document.addEventListener("click", handleComputerMenu, false);
+    game.computerMenu();
   }
-  document.removeEventListener("click", handleStartMenu, false);
-  document.addEventListener("click", handleComputerMenu, false);
-  game.computerMenu();
 }
 /**
  * @function handleComputerMenu
@@ -428,18 +428,24 @@ function handleComputerMenu(e) {
   // check displayInputChoice1 for hits
   if (x >= game.displayInputChoiceA.x && x <= game.displayInputChoiceA.x + game.ctx.measureText(game.displayInputChoiceA.value).width && y >= game.displayInputChoiceA.y && y <= game.displayInputChoiceA.y + 40) {
     game.computer.speed = 2;
+    document.removeEventListener("click", handleComputerMenu, false);
+    game.pause = false;
+    animate(step);
   }
   // check displayInputChoice2 for hits
   if (x >= game.displayInputChoiceB.x && x <= game.displayInputChoiceB.x + game.ctx.measureText(game.displayInputChoiceB.value).width && y >= game.displayInputChoiceB.y && y <= game.displayInputChoiceB.y + 40) {
     game.computer.speed = 4;
+    document.removeEventListener("click", handleComputerMenu, false);
+    game.pause = false;
+    animate(step);
   }
   // check displayInputChoice3 for hits
   if (x >= game.displayInputChoiceC.x && x <= game.displayInputChoiceC.x + game.ctx.measureText(game.displayInputChoiceC.value).width && y >= game.displayInputChoiceC.y && y <= game.displayInputChoiceC.y + 40) {
     game.computer.speed = 8;
+    document.removeEventListener("click", handleComputerMenu, false);
+    game.pause = false;
+    animate(step);
   }
-  document.removeEventListener("click", handleComputerMenu, false);
-  game.pause = false;
-  animate(step);
 }
 /**
  * @function handleEndMenu
