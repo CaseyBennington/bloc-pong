@@ -171,7 +171,7 @@ class Ball {
     //       }
     //     }
     //
-    //     // add/remove spin based on paddle direction (FUTURE CONCEPT)
+    //     // (FUTURE CONCEPT) add/remove spin based on paddle direction (FUTURE CONCEPT)
     //     // if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
     //     //   this.vx = this.vx * (this.vx < 0 ? 0.5 : 1.5);
     //     // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
@@ -218,13 +218,13 @@ class Ball {
         let k = collisionDiff / this.vx;
         let y = this.vy * k + ((this.y + this.width) - this.vy);
         console.log(y >= game.player.y && y + this.height <= game.player.y + game.player.height);
-        if (y >= game.player.y && y + this.height <= game.player.y + game.player.height) {
+        if (y >= game.player.y && y /* + this.height */ <= game.player.y + game.player.height) {
           // collides with right Paddle
           // this.x = game.player.x - game.player.width;
           // this.y = Math.floor(this.y - this.vy + this.vy * k);
           this.vx = -this.vx;
         }
-        // game.pause = true;
+        game.pause = true;
         console.log("y: " + y);
         console.log("ball height: " + this.height);
         console.log("game.player.y: " + game.player.y);
