@@ -102,13 +102,6 @@ class Computer extends Paddle {
     } else if (this.y + this.height > game.canvas.height) {
       this.y = game.canvas.height - this.height;
     }
-
-
-    // if (ball.y > this.y) {
-    //   this.y += 1;
-    // } else if (ball.y < this.y) {
-    //   this.y -= 1;
-    // }
   }
 }
 
@@ -149,99 +142,109 @@ class Ball {
     let bottom_x = this.x;
     let bottom_y = this.y + this.height;
 
-    // if (left_x > game.canvas.width/2) { // check if on the player's side
-    //   if (right_x <= game.player.x && right_x <= game.player.x && right_y < game.player.y && right_y > game.player.y + game.player.height) {
-    //     // hit the player's Paddle
-    //
-    //     // Add speed to top and bottom fifths, wnd top and bottom fifths, and reduce speed of middle fifth of the paddle
-    //     if (((game.player.y + (game.player.height / 5)) >= this.y) || (game.player.y + (game.player.height - (game.player.height / 5)) <= this.y)) { // top fifth or bottom fifth
-    //       this.vx = this.vx * 1.3; // limit to 20
-    //       if (this.vx >= 20) {
-    //         this.vx = 20;
-    //       }
-    //     } else if (((game.player.y + (game.player.height / 5) * 2) >= this.y) || (game.player.y + (game.player.height - (game.player.height / 5) * 2) <= this.y)) { // 2nd top fifth or 2nd bottom fifth
-    //       this.vx = this.vx * 1.1; // limit to 20
-    //       if (this.vx >= 20) {
-    //         this.vx = 20;
-    //       }
-    //     } else { // middle fifth
-    //       this.vx = this.vx * 0.8; // limit to 10
-    //       if (this.vx <= 10) {
-    //         this.vx = 10;
-    //       }
-    //     }
-    //
-    //     // (FUTURE CONCEPT) add/remove spin based on paddle direction (FUTURE CONCEPT)
-    //     // if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
-    //     //   this.vx = this.vx * (this.vx < 0 ? 0.5 : 1.5);
-    //     // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
-    //     //   this.vx = this.vx * (this.vx > 0 ? 0.5 : 1.5);
-    //     // }
-    //     this.vx = -this.vx;
-    //   }
-    // } else { // else its on the computer's side
-    //   if (left_x <= (game.computer.x + game.computer.width) || right_x <= game.computer.x + game.computer.width && left_y <= (game.computer.y + game.computer.height) && right_y >= game.computer.y) {
-    //     // hit the computer's Paddle
-    //
-    //     // Add speed to top and bottom fifths, wnd top and bottom fifths, and reduce speed of middle fifth of the paddle
-    //     if (((game.computer.y + (game.computer.height / 5)) >= this.y) || (game.computer.y + (game.computer.height - (game.computer.height / 5)) <= this.y)) { // top fifth or bottom fifth
-    //       this.vx = this.vx * 1.3; // limit to 20
-    //       if (this.vx >= 20) {
-    //         this.vx = 20;
-    //       }
-    //     } else if (((game.computer.y + (game.computer.height / 5) * 2) >= this.y) || (game.computer.y + (game.computer.height - (game.computer.height / 5) * 2) <= this.y)) { // 2nd top fifth or 2nd bottom fifth
-    //       this.vx = this.vx * 1.1; // limit to 20
-    //       if (this.vx >= 20) {
-    //         this.vx = 20;
-    //       }
-    //     } else { // middle fifth
-    //       this.vx = this.vx * 0.8; // limit to 10
-    //       if (this.vx <= 10) {
-    //         this.vx = 10;
-    //       }
-    //     }
-    //
-    //     // add/remove spin based on paddle direction (FUTURE CONCEPT)
-    //     // if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
-    //     //   this.vy = this.vy * (this.vy < 0 ? 0.5 : 1.5);
-    //     // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
-    //     //   this.vy = this.vy * (this.vy > 0 ? 0.5 : 1.5);
-    //     // }
-    //     this.vx = -this.vx;
-    //   }
-    // }
+    if (left_x > game.canvas.width/2) { // check if on the player's side
+      if (left_x <= (game.player.x + game.player.width)
+        && game.player.x <= (left_x + this.width)
+        && left_y <= (game.player.y + game.player.height)
+        && game.player.y <= (left_y + this.height)) {
 
-    // (FUTURE CONCEPT) To add functionality to predict where the ball will hit the paddle for excessive speed balls that would "skip" collision
-    if (this.vx > 0) {
-      if (game.player.x <= this.x + this.width && game.player.x > this.x - this.vx + this.width) {
-        let collisionDiff = this.x + this.width - game.player.x;
-        let k = collisionDiff / this.vx;
-        let y = this.vy * k + ((this.y + this.width) - this.vy);
-        console.log(y >= game.player.y && y + this.height <= game.player.y + game.player.height);
-        if (y >= game.player.y && y /* + this.height */ <= game.player.y + game.player.height) {
-          // collides with right Paddle
-          // this.x = game.player.x - game.player.width;
-          // this.y = Math.floor(this.y - this.vy + this.vy * k);
-          this.vx = -this.vx;
+        // hit the player's Paddle
+
+        // Add speed to top and bottom fifths, wnd top and bottom fifths, and reduce speed of middle fifth of the paddle
+        if (((game.player.y + (game.player.height / 5)) >= this.y) || (game.player.y + (game.player.height - (game.player.height / 5)) <= this.y)) { // top fifth or bottom fifth
+          this.vx = this.vx * 1.2; // limit to 20
+          if (this.vx >= 20) {
+            this.vx = 20;
+            this.vy += 1;
+          }
+        } else if (((game.player.y + (game.player.height / 5) * 2) >= this.y) || (game.player.y + (game.player.height - (game.player.height / 5) * 2) <= this.y)) { // 2nd top fifth or 2nd bottom fifth
+          this.vx = this.vx * 1.1; // limit to 20
+          if (this.vx >= 20) {
+            this.vx = 20;
+          }
+        } else { // middle fifth
+          this.vx = this.vx * 0.8; // limit to 10
+          if (this.vx <= 10) {
+            this.vx = 10;
+          }
         }
-        game.pause = true;
-        console.log("y: " + y);
-        console.log("ball height: " + this.height);
-        console.log("game.player.y: " + game.player.y);
+
+        // (FUTURE CONCEPT) add/remove spin based on paddle direction (FUTURE CONCEPT)
+        // if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
+        //   this.vx = this.vx * (this.vx < 0 ? 0.5 : 1.5);
+        // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
+        //   this.vx = this.vx * (this.vx > 0 ? 0.5 : 1.5);
+        // }
+        this.vx = -this.vx;
       }
-    } else {
-      if (game.computer.x + game.computer.width >= this.x) {
-        let collisionDiff = game.computer.x + game.computer.width - this.x;
-        let k = collisionDiff / -this.vx;
-        let y = this.vy * k + ((this.y + this.width) - this.vy);
-        if (y >= game.computer.y && y + this.height <= game.computer.y + game.computer.height) {
-          // collides with left Paddle
-          // this.x = game.computer.x - game.computer.width;
-          // this.y = Math.floor(this.y - this.vy + this.vy * k);
-          this.vx = -this.vx;
+    } else { // else its on the computer's side
+      if (left_x <= (game.computer.x + game.computer.width)
+        && game.computer.x <= (left_x + this.width)
+        && left_y <= (game.computer.y + game.computer.height)
+        && game.computer.y <= (left_y + this.height)) {
+
+        // hit the computer's Paddle
+
+        // Add speed to top and bottom fifths, wnd top and bottom fifths, and reduce speed of middle fifth of the paddle
+        if (((game.computer.y + (game.computer.height / 5)) >= this.y) || (game.computer.y + (game.computer.height - (game.computer.height / 5)) <= this.y)) { // top fifth or bottom fifth
+          this.vx = this.vx * 1.2; // limit to 20
+          if (this.vx >= 20) {
+            this.vx = -20;
+            this.vy += 1;
+          }
+        } else if (((game.computer.y + (game.computer.height / 5) * 2) >= this.y) || (game.computer.y + (game.computer.height - (game.computer.height / 5) * 2) <= this.y)) { // 2nd top fifth or 2nd bottom fifth
+          this.vx = this.vx * 1.1; // limit to 20
+          if (this.vx >= 20) {
+            this.vx = -20;
+          }
+        } else { // middle fifth
+          this.vx = this.vx * 0.8; // limit to 10
+          if (this.vx <= 10) {
+            this.vx = -10;
+          }
         }
+
+        // (FUTURE CONCEPT) add/remove spin based on paddle direction (FUTURE CONCEPT)
+        // if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
+        //   this.vy = this.vy * (this.vy < 0 ? 0.5 : 1.5);
+        // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
+        //   this.vy = this.vy * (this.vy > 0 ? 0.5 : 1.5);
+        // }
+        this.vx = -this.vx;
       }
     }
+
+    // // (FUTURE CONCEPT) To add functionality to predict where the ball will hit the paddle for excessive speed balls that would "skip" collision
+    // if (this.vx > 0) {
+    //   if (game.player.x <= this.x + this.width && game.player.x > this.x - this.vx + this.width) {
+    //     let collisionDiff = this.x + this.width - game.player.x;
+    //     let k = collisionDiff / this.vx;
+    //     let y = this.vy * k + (this.y - this.vy);
+    //     console.log(y >= game.player.y && y + this.height <= game.player.y + game.player.height);
+    //     if (y >= game.player.y && y /* + this.height */ <= game.player.y + game.player.height) {
+    //       // collides with right Paddle
+    //       // this.x = game.player.x - game.player.width;
+    //       // this.y = Math.floor(this.y - this.vy + this.vy * k);
+    //       this.vx = -this.vx;
+    //     }
+    //     game.pause = true;
+    //     console.log("y: " + y);
+    //     console.log("ball height: " + this.height);
+    //     console.log("game.player.y: " + game.player.y);
+    //   }
+    // } else {
+    //   if (game.computer.x + game.computer.width >= this.x) {
+    //     let collisionDiff = game.computer.x + game.computer.width - this.x;
+    //     let k = collisionDiff / -this.vx;
+    //     let y = this.vy * k + (this.y - this.vy);
+    //     if (y >= game.computer.y && y + this.height <= game.computer.y + game.computer.height) {
+    //       // collides with left Paddle
+    //       // this.x = game.computer.x - game.computer.width;
+    //       // this.y = Math.floor(this.y - this.vy + this.vy * k);
+    //       this.vx = -this.vx;
+    //     }
+    //   }
+    // }
 
     // Check for Top and bottom collision
     if ((this.vy <= 0 && this.y <= 0) || (this.vy > 0 && this.y + this.height > game.canvas.height)) {
@@ -427,21 +430,21 @@ function handleComputerMenu(e) {
 
   // check displayInputChoice1 for hits
   if (x >= game.displayInputChoiceA.x && x <= game.displayInputChoiceA.x + game.ctx.measureText(game.displayInputChoiceA.value).width && y >= game.displayInputChoiceA.y && y <= game.displayInputChoiceA.y + 40) {
-    game.computer.speed = 2;
+    game.computer.speed = 1;
     document.removeEventListener("click", handleComputerMenu, false);
     game.pause = false;
     animate(step);
   }
   // check displayInputChoice2 for hits
   if (x >= game.displayInputChoiceB.x && x <= game.displayInputChoiceB.x + game.ctx.measureText(game.displayInputChoiceB.value).width && y >= game.displayInputChoiceB.y && y <= game.displayInputChoiceB.y + 40) {
-    game.computer.speed = 4;
+    game.computer.speed = 3;
     document.removeEventListener("click", handleComputerMenu, false);
     game.pause = false;
     animate(step);
   }
   // check displayInputChoice3 for hits
   if (x >= game.displayInputChoiceC.x && x <= game.displayInputChoiceC.x + game.ctx.measureText(game.displayInputChoiceC.value).width && y >= game.displayInputChoiceC.y && y <= game.displayInputChoiceC.y + 40) {
-    game.computer.speed = 8;
+    game.computer.speed = 5;
     document.removeEventListener("click", handleComputerMenu, false);
     game.pause = false;
     animate(step);
@@ -514,7 +517,7 @@ function randomVelocity() {
   let v = 0;
   do {
     v = Math.floor((Math.random() * 20) - 10);
-  } while (v === 0);
+  } while (v === 0 || v === 1 || v === -1 );
   return v;
 }
 
