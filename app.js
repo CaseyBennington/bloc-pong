@@ -178,6 +178,9 @@ class Ball {
         this.vy = this.y - game.player.y;
         this.vy = ((this.vy / game.player.height) * 2);
         this.vy *= MAX;
+
+        // Play paddle sound
+        game.paddleSound.play();
       }
     } else { // else its on the computer's side
       if (left_x <= (game.computer.x + game.computer.width)
@@ -212,12 +215,15 @@ class Ball {
         // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
         //   this.vy = this.vy * (this.vy > 0 ? 0.5 : 1.5);
         // }
-        
+
         // Adjust the speed of the reflection and add in some primitive inelastic y movement.
         this.vx = -this.vx;
         this.vy = this.y - game.player.y;
         this.vy = ((this.vy / game.player.height) * 2);
         this.vy *= MAX;
+
+        // Play paddle sound
+        game.paddleSound.play();
       }
     }
 
@@ -256,6 +262,9 @@ class Ball {
     // Check for Top and bottom collision
     if ((this.vy <= 0 && this.y <= 0) || (this.vy > 0 && this.y + this.height > game.canvas.height)) {
       this.vy = -this.vy;
+
+      // Play wall sound
+      game.wallSound.play();
     }
 
     // Determine scoring play
@@ -289,6 +298,9 @@ class Game {
     this.ball = new Ball(this.canvas.width/2, this.canvas.height/2);
     this.display1 = new Display(this.canvas.width/4, 40, 0);
     this.display2 = new Display(this.canvas.width*3/4, 40, 0);
+    this.wallSound = new sound("sounds/wallsound.wav");
+    this.paddleSound = new sound("sounds/paddlesound.wav");
+    this.scoreSound = new sound("sounds/scoresound.wav");
   }
   render () {
     this.setupCanvas();
@@ -324,6 +336,9 @@ class Game {
     this.ball.ballSpeed();
     if (player == 1)
       this.ball.vx *= -1;
+
+    // Play score sound
+    game.scoreSound.play();
   }
   startMenu () {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -526,6 +541,25 @@ function randomVelocity() {
     v = Math.floor((Math.random() * 20) - 10);
   } while (v === 0 || v === 1 || v === -1 );
   return v;
+}
+/**
+ * @function sound
+ * @desc function that adds sounds functionality
+ * @param {object} src
+ */
+function sound(src) {
+  this.sound = document.createElement("audio");
+  this.sound.src = src;
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function() {
+    this.sound.play();
+  };
+  this.stop = function() {
+    this.sound.pause();
+  };
 }
 
 // Define our animation frames
