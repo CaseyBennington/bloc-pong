@@ -93,9 +93,9 @@ class Computer extends Paddle {
     this.oldY = this.y;
     let diff = -((this.y + (this.height / 2 )) - ball.y);
     if ((diff < 0 && diff < -this.speed) && this.y > 0) { // ball higher than paddle
-      this.y += diff;
+      this.y -= this.speed;
     } else if ((diff > 0 && diff > this.speed) && this.y < game.ctx.canvas.height-this.height) { // ball lower than paddle
-      this.y += diff;
+      this.y += this.speed;
     }
     if (this.y < 0) {
       this.y = 0;
@@ -137,10 +137,7 @@ class Ball {
     this.y += this.vy;
     let left_x = this.x;
     let left_y = this.y;
-    let right_x = this.x + this.width;
-    let right_y = this.y;
-    let bottom_x = this.x;
-    let bottom_y = this.y + this.height;
+    const MAX = 10;
 
     if (left_x > game.canvas.width/2) { // check if on the player's side
       if (left_x <= (game.player.x + game.player.width)
@@ -152,15 +149,15 @@ class Ball {
 
         // Add speed to top and bottom fifths, wnd top and bottom fifths, and reduce speed of middle fifth of the paddle
         if (((game.player.y + (game.player.height / 5)) >= this.y) || (game.player.y + (game.player.height - (game.player.height / 5)) <= this.y)) { // top fifth or bottom fifth
-          this.vx = this.vx * 1.2; // limit to 20
-          if (this.vx >= 20) {
-            this.vx = 20;
-            this.vy += 1;
+          this.vx = this.vx * 1.1; // limit to 15
+          if (this.vx >= 15) {
+            this.vx = 15;
+            // this.vy += 1;
           }
         } else if (((game.player.y + (game.player.height / 5) * 2) >= this.y) || (game.player.y + (game.player.height - (game.player.height / 5) * 2) <= this.y)) { // 2nd top fifth or 2nd bottom fifth
-          this.vx = this.vx * 1.1; // limit to 20
-          if (this.vx >= 20) {
-            this.vx = 20;
+          this.vx = this.vx * 1.05; // limit to 15
+          if (this.vx >= 15) {
+            this.vx = 15;
           }
         } else { // middle fifth
           this.vx = this.vx * 0.8; // limit to 10
@@ -175,7 +172,12 @@ class Ball {
         // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
         //   this.vx = this.vx * (this.vx > 0 ? 0.5 : 1.5);
         // }
+
+        // Adjust the speed of the reflection and add in some primitive inelastic y movement.
         this.vx = -this.vx;
+        this.vy = this.y - game.player.y;
+        this.vy = ((this.vy / game.player.height) * 2);
+        this.vy *= MAX;
       }
     } else { // else its on the computer's side
       if (left_x <= (game.computer.x + game.computer.width)
@@ -187,15 +189,15 @@ class Ball {
 
         // Add speed to top and bottom fifths, wnd top and bottom fifths, and reduce speed of middle fifth of the paddle
         if (((game.computer.y + (game.computer.height / 5)) >= this.y) || (game.computer.y + (game.computer.height - (game.computer.height / 5)) <= this.y)) { // top fifth or bottom fifth
-          this.vx = this.vx * 1.2; // limit to 20
-          if (this.vx >= 20) {
-            this.vx = -20;
+          this.vx = this.vx * 1.1; // limit to 15
+          if (this.vx >= 15) {
+            this.vx = -15;
             this.vy += 1;
           }
         } else if (((game.computer.y + (game.computer.height / 5) * 2) >= this.y) || (game.computer.y + (game.computer.height - (game.computer.height / 5) * 2) <= this.y)) { // 2nd top fifth or 2nd bottom fifth
-          this.vx = this.vx * 1.1; // limit to 20
-          if (this.vx >= 20) {
-            this.vx = -20;
+          this.vx = this.vx * 1.05; // limit to 15
+          if (this.vx >= 15) {
+            this.vx = -15;
           }
         } else { // middle fifth
           this.vx = this.vx * 0.8; // limit to 10
@@ -210,7 +212,12 @@ class Ball {
         // } else if (game.player.oldY > game.player.y || game.computer.oldY > game.computer.y) {
         //   this.vy = this.vy * (this.vy > 0 ? 0.5 : 1.5);
         // }
+        
+        // Adjust the speed of the reflection and add in some primitive inelastic y movement.
         this.vx = -this.vx;
+        this.vy = this.y - game.player.y;
+        this.vy = ((this.vy / game.player.height) * 2);
+        this.vy *= MAX;
       }
     }
 
@@ -430,21 +437,21 @@ function handleComputerMenu(e) {
 
   // check displayInputChoice1 for hits
   if (x >= game.displayInputChoiceA.x && x <= game.displayInputChoiceA.x + game.ctx.measureText(game.displayInputChoiceA.value).width && y >= game.displayInputChoiceA.y && y <= game.displayInputChoiceA.y + 40) {
-    game.computer.speed = 1;
+    game.computer.speed = 5;
     document.removeEventListener("click", handleComputerMenu, false);
     game.pause = false;
     animate(step);
   }
   // check displayInputChoice2 for hits
   if (x >= game.displayInputChoiceB.x && x <= game.displayInputChoiceB.x + game.ctx.measureText(game.displayInputChoiceB.value).width && y >= game.displayInputChoiceB.y && y <= game.displayInputChoiceB.y + 40) {
-    game.computer.speed = 3;
+    game.computer.speed = 8;
     document.removeEventListener("click", handleComputerMenu, false);
     game.pause = false;
     animate(step);
   }
   // check displayInputChoice3 for hits
   if (x >= game.displayInputChoiceC.x && x <= game.displayInputChoiceC.x + game.ctx.measureText(game.displayInputChoiceC.value).width && y >= game.displayInputChoiceC.y && y <= game.displayInputChoiceC.y + 40) {
-    game.computer.speed = 5;
+    game.computer.speed = 12;
     document.removeEventListener("click", handleComputerMenu, false);
     game.pause = false;
     animate(step);
