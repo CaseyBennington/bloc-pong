@@ -1,4 +1,4 @@
-## CB Pong: Replica of the First Computer Game
+# CB Pong: Replica of the First Computer Game
 
 [![](pic)](https://caseybennington.github.io/bloc-pong)
 
