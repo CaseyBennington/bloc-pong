@@ -342,7 +342,7 @@ class Game {
   }
   startMenu () {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.displayMessage = new Display(this.canvas.width/2 - (this.ctx.measureText(this.displayMessage).width), this.canvas.height/2 - 140, 'Welcome to Pong!');
+    this.displayMessage = new Display(this.canvas.width/2 - (this.ctx.measureText(this.displayMessage).width), this.canvas.height/2 - 140, 'Welcome to CB Pong!');
     this.displayInputChoice = new Display(this.canvas.width/2 - (this.ctx.measureText(this.displayInputChoice).width), this.canvas.height/2 - 40, 'Choose your control type:');
     this.displayInputChoice1 = new Display(this.canvas.width/2 - (this.ctx.measureText(this.displayInputChoice1).width), this.canvas.height/2 + 40, '* Mouse');
     this.displayInputChoice2 = new Display(this.canvas.width/2 - (this.ctx.measureText(this.displayInputChoice2).width), this.canvas.height/2 + 80, '* Keyboard');
@@ -427,7 +427,7 @@ function handleStartMenu(e) {
   if (x >= game.displayInputChoice1.x && x <= game.displayInputChoice1.x + game.ctx.measureText(game.displayInputChoice1.value).width && y >= game.displayInputChoice1.y && y <= game.displayInputChoice1.y + 40) {
     // add in mouse behavior
     document.addEventListener('mousemove', mouseMoveHandler, false);
-    game.player.speed = 10;
+    game.player.speed = 4;
     game.player.keyboard = false;
     document.removeEventListener("click", handleStartMenu, false);
     document.addEventListener("click", handleComputerMenu, false);
