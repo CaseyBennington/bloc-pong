@@ -1,6 +1,6 @@
-# CB Pong: Replica of the First Computer Game
+# CB Pong: Replica of the First Computer Game, [Pong](http://www.ponggame.org/)
 
-[![cb-pong.png](Play the game.)](https://caseybennington.github.io/bloc-pong)
+[![Play the game.](cb-pong.png)](https://caseybennington.github.io/bloc-pong)
 
 CB Pong is a Pong replica written entirely inside of the HTML5 **Canvas** element.
 
