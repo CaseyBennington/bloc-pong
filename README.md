@@ -9,3 +9,5 @@ TODO:
   * Further fine tune the speed of the ball and of the paddles.
   * Further fine tune the difficulty levels of the computer player.
   * Adjust the collision detection to become more robust to predict where the ball will be and thus avoid potentially clipping through the paddle.
+
+[Play the game.](https://caseybennington.github.io/bloc-pong)
